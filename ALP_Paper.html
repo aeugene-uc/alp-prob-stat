@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Pemodelan Konsumsi Bahan Bakar Gabungan Kendaraan</title>
+<style>
+  @page { size: 190mm 260mm; margin: 25mm 14mm 18mm 13mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 10pt; line-height: 1.18; color: #000; margin: 0; text-align: justify;
+  }
+  p { margin: 0 0 5px; text-indent: 14px; }
+  p.ni { text-indent: 0; }
+
+  /* running header on every page */
+  .runhead {
+    position: fixed; top: 6mm; left: 13mm; right: 14mm; height: 15mm;
+  }
+  .runhead .row { display: flex; align-items: center; justify-content: space-between; }
+  .runhead img { height: 8mm; }
+  .runhead .meta { text-align: right; font-size: 7.5pt; line-height: 1.25; }
+  .runhead .rule { border-bottom: 1.1px solid #000; margin-top: 2px; }
+
+  /* title block */
+  .ttl { font-size: 16pt; font-weight: bold; text-align: center; line-height: 1.18; margin: 0 0 2px; }
+  .ttl-en { font-size: 16pt; font-style: italic; font-weight: normal; text-align: center; line-height: 1.18; margin: 0 0 8px; }
+  .auth { text-align: center; font-size: 11pt; margin: 6px 0 2px; }
+  .auth sup { font-size: 7pt; }
+  .affil { text-align: center; font-size: 8.5pt; line-height: 1.3; margin: 1px 0; }
+  .affil sup { font-size: 6.5pt; }
+  .recv { text-align: center; font-size: 8pt; font-style: italic; margin: 6px 0 2px; }
+  .lic { text-align: center; font-size: 8pt; margin: 0 0 8px; }
+
+  .abs { font-size: 10pt; margin: 2px 0; }
+  .abs .l { font-weight: bold; }
+  .kw { font-size: 10pt; margin: 0 0 4px; }
+  .kw .l { font-weight: bold; }
+
+  h2 { font-size: 10pt; font-weight: bold; margin: 9px 0 3px; }
+  h3 { font-size: 10pt; font-weight: bold; font-style: italic; margin: 7px 0 2px; }
+  ul { margin: 3px 0; padding-left: 20px; }
+  li { margin: 1px 0; }
+
+  table.tbl { border-collapse: collapse; width: 100%; margin: 2px 0 6px; font-size: 8pt; }
+  table.tbl caption { caption-side: top; text-align: left; font-weight: bold; font-size: 8.5pt; margin-bottom: 2px; }
+  table.tbl th, table.tbl td { padding: 1.5px 5px; text-align: left; }
+  table.tbl thead th { border-top: 1.1px solid #000; border-bottom: 1px solid #000; }
+  table.tbl tbody tr:last-child td { border-bottom: 1.1px solid #000; }
+  table.tbl td.num, table.tbl th.num { text-align: right; }
+  .twocol { display: flex; gap: 8px; }
+  .twocol table { flex: 1; }
+
+  figure { margin: 5px 0; text-align: center; page-break-inside: avoid; }
+  figure img { display: block; margin: 0 auto; }
+  figcaption { font-size: 8pt; margin-top: 2px; }
+  .refs p { text-indent: -18px; padding-left: 18px; font-size: 9pt; margin: 0 0 3px; }
+</style>
+</head>
+<body>
+
+<!-- ============ RUNNING HEADER (tiap halaman) ============ -->
+<div class="runhead">
+  <div class="row">
+    <img src="figs/tpl_img3.png" alt="JUISI">
+    <div class="meta">
+      Volume xx Nomor yy<br>
+      e-ISSN: 2477-5452; p-ISSN: 2460-1306<br>
+      DOI: -
+    </div>
+  </div>
+  <div class="rule"></div>
+</div>
+
+<!-- ============ TITLE BLOCK ============ -->
+<div class="ttl">Pemodelan Konsumsi Bahan Bakar Gabungan Kendaraan Menggunakan Regresi Linear Berganda dengan One-Hot Encoding</div>
+<div class="ttl-en">Modeling Combined Vehicle Fuel Consumption Using Multiple Linear Regression with One-Hot Encoding</div>
+
+<div class="auth">Amadeus Eugene Dirgantara<sup>1</sup>, Rei Putra Soemanto<sup>2</sup>, Jason Tio<sup>3</sup>, Christopher Andreas, S.Stat., M.Stat.<sup>4</sup></div>
+<div class="affil"><sup>1,2,3</sup>Program Studi Informatika, Universitas Ciputra, Surabaya, Jawa Timur, Indonesia</div>
+<div class="affil"><sup>4</sup>Dosen Pengampu Mata Kuliah Probabilitas dan Statistika, Universitas Ciputra, Surabaya, Indonesia</div>
+<div class="affil">NIM: 0706012410063<sup>1</sup>, 0706012410060<sup>2</sup>, 0706012410006<sup>3</sup></div>
+<div class="affil">*Email penulis korespondensi: amadeuseugenedirgantara@gmail.com</div>
+
+<div class="recv">Naskah diterima 1 Januari 2023; direvisi 1 Februari 2023; dipublikasi 1 Maret 2023.</div>
+<div class="lic">JUISI is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.</div>
+
+<!-- ============ ABSTRAK ============ -->
+<div class="abs"><p class="ni"><span class="l">Abstrak:</span> Konsumsi bahan bakar kendaraan berkaitan langsung dengan biaya operasional, emisi, dan kebijakan keberlanjutan, sehingga kemampuan memprediksinya dari spesifikasi teknis memiliki nilai praktis. Penelitian ini memodelkan konsumsi bahan bakar gabungan (comb_l_100km, dalam L/100 km) menggunakan dataset Fuel Consumption 2000&ndash;2022 yang berisi 22.555 baris setelah pembersihan. Pendekatan yang dipakai adalah regresi linear berganda dengan one-hot encoding pada variabel kategorikal jenis bahan bakar, kelas kendaraan, dan tipe transmisi, ditambah prediktor numerik ukuran mesin, jumlah silinder, dan jumlah gigi. Tahun model dibuang karena korelasinya dengan respons mendekati nol; jumlah silinder dipertahankan meskipun hampir kolinier dengan ukuran mesin karena uji ablasi menunjukkan ia masih menambah daya prediksi; suku kuadratik ukuran mesin diuji namun tidak menaikkan R-squared uji sehingga model linear yang lebih sederhana dipilih. Model akhir menjelaskan sekitar 84 persen variansi (R-squared uji sekitar 0,84) dengan RMSE uji sekitar 1,18 L/100 km tanpa indikasi overfitting. Penggerak utama adalah jenis bahan bakar, kelas kendaraan, dan ukuran mesin. Uji Breusch-Pagan dan Jarque-Bera menolak homoskedastisitas dan normalitas; penolakan ini wajar pada sampel besar dan tidak membatalkan estimasi titik koefisien. Standard error robust HC3 dipakai agar inferensi tetap sahih terhadap heteroskedastisitas.</p></div>
+<div class="kw"><span class="l">Kata Kunci:</span> regresi linear berganda, one-hot encoding, seleksi fitur, konsumsi bahan bakar, multikolinieritas, heteroskedastisitas, standard error robust HC3.</div>
+
+<div class="abs"><p class="ni" style="font-style:italic"><span class="l">Abstract:</span> Vehicle fuel consumption is directly related to operating cost, emissions, and sustainability policy, so predicting it from technical specifications has practical value. This study models combined fuel consumption (comb_l_100km, in L/100 km) using the Fuel Consumption 2000&ndash;2022 dataset containing 22,555 rows after cleaning, via multiple linear regression with one-hot encoding on fuel type, vehicle class, and transmission type, plus numeric predictors engine size, cylinder count, and number of gears. Model year is dropped (near-zero correlation); cylinder count is kept despite collinearity with engine size because an ablation test shows it still adds predictive power; a quadratic engine-size term did not raise the test R-squared, so the simpler linear model was chosen. The final model explains about 84 percent of variance (test R-squared about 0.84) with a test RMSE of about 1.18 L/100 km and no overfitting. The main drivers are fuel type, vehicle class, and engine size. Breusch-Pagan and Jarque-Bera reject homoscedasticity and normality; these rejections are expected at large samples and do not invalidate the point estimates. HC3 robust standard errors keep inference valid under heteroscedasticity.</p></div>
+<div class="kw" style="font-style:italic"><span class="l">Keywords:</span> multiple linear regression, one-hot encoding, feature selection, fuel consumption, multicollinearity, heteroscedasticity, HC3 robust standard errors.</div>
+
+<!-- ============ 1. PENDAHULUAN ============ -->
+<h2>1. Pendahuluan</h2>
+<p>Konsumsi bahan bakar kendaraan merupakan indikator yang berhubungan langsung dengan biaya operasional, emisi gas rumah kaca, dan kebijakan keberlanjutan transportasi. Kemampuan memprediksinya dari karakteristik teknis bermanfaat untuk perencanaan armada, perbandingan biaya bagi konsumen, deteksi anomali data spesifikasi, sampai pelaporan keberlanjutan, sehingga pemodelan statistik yang tepat menjadi kebutuhan yang relevan.</p>
+<p>Karakteristik kendaraan terdiri atas besaran numerik (ukuran mesin, jumlah silinder, jumlah gigi) dan kategori (jenis bahan bakar, kelas kendaraan, tipe transmisi). Variabel kategori tidak dapat langsung masuk regresi karena berupa label, sehingga perlu diubah menjadi kolom indikator melalui one-hot encoding agar pengaruh tiap kategori diestimasi terpisah terhadap kategori acuan.</p>
+<p>Pemodelan ini menghadapi empat tantangan: multikolinieritas antara ukuran mesin dan jumlah silinder; keberadaan prediktor nyaris tak relevan seperti tahun model; kemungkinan kelengkungan hubungan ukuran mesin dengan konsumsi; serta pemenuhan asumsi Ordinary Least Squares (OLS) yang menjadi dasar inferensi. Sesuai itu, penelitian menjawab empat pertanyaan: fitur mana yang dipertahankan, bagaimana kategori diolah tanpa kolinieritas sempurna, apakah model linear memadai atau perlu suku polinomial, dan apakah asumsi OLS terpenuhi serta bagaimana menangani pelanggarannya. Jawabannya disusun melalui kerangka analisis bertahap dari eksplorasi data, seleksi fitur berbasis korelasi, pembentukan model, pemilihan bentuk fungsional, validasi asumsi, hingga penyempurnaan inferensi dengan standard error robust.</p>
+
+<!-- ============ 2. KAJIAN PUSTAKA ============ -->
+<h2>2. Kajian Pustaka</h2>
+<h3>2.1 Regresi Linear Berganda</h3>
+<p>Regresi linear berganda memodelkan respons sebagai jumlah konstanta dan kontribusi linear tiap prediktor; koefisiennya menyatakan perubahan rata-rata respons untuk kenaikan satu satuan prediktor dengan prediktor lain ditahan tetap. Model diestimasi dengan kuadrat terkecil yang meminimalkan jumlah kuadrat selisih nilai sebenarnya dan prediksi. Kesederhanaan dan kemudahan interpretasinya menjadikannya titik awal yang wajar (Montgomery dkk., 2012; James dkk., 2013).</p>
+<h3>2.2 One-Hot Encoding dan Kategori Acuan</h3>
+<p>One-hot encoding mengubah satu variabel kategori menjadi kolom indikator bernilai nol atau satu. Untuk variabel dengan k kategori dibuat k&minus;1 kolom dan satu kategori menjadi acuan, untuk menghindari dummy variable trap, yaitu kolinieritas sempurna antara kolom indikator dan konstanta. Koefisien tiap indikator dibaca sebagai selisih rata-rata respons kategori tersebut terhadap acuan (James dkk., 2013).</p>
+<h3>2.3 Korelasi Pearson dan Spearman</h3>
+<p>Korelasi Pearson mengukur kekuatan hubungan linear, sedangkan Spearman mengukur hubungan monoton karena dihitung pada peringkat sehingga lebih tahan pencilan dan tidak mengandaikan bentuk lurus (Spearman, 1904). Bila Spearman jauh lebih besar daripada Pearson, ada kelengkungan monoton yang membuat Pearson meremehkan hubungan; bila keduanya berdekatan, hubungan monotonnya nyaris lurus sehingga Pearson sah dibaca sebagai kekuatan linear.</p>
+<h3>2.4 Multikolinieritas</h3>
+<p>Multikolinieritas terjadi ketika dua atau lebih prediktor berkorelasi sangat tinggi, sehingga koefisien menjadi sensitif terhadap perubahan kecil data dan standard error membesar. Namun kolinieritas tidak selalu menurunkan daya prediksi; selama pola korelasi antarprediktor tetap berlaku pada data baru, kedua prediktor dapat dipertahankan apabila terbukti menambah akurasi (Montgomery dkk., 2012).</p>
+<h3>2.5 Validasi Asumsi OLS dan Standard Error Robust HC3</h3>
+<p>Inferensi OLS bertumpu pada asumsi error, terutama homoskedastisitas (variansi error konstan) dan normalitas residual. Homoskedastisitas diuji dengan Breusch-Pagan (Breusch &amp; Pagan, 1979) dan normalitas dengan Jarque-Bera (Jarque &amp; Bera, 1980), dilengkapi diagnostik visual Q-Q plot dan plot residual terhadap prediksi. Pada sampel besar kedua uji sangat sensitif sehingga hampir selalu menolak walau penyimpangan kecil. Ketika heteroskedastisitas terkonfirmasi, estimasi titik tetap tidak bias namun standard error klasik keliru; solusinya standard error robust, dengan varian HC3 yang paling konservatif sebagai pilihan default (MacKinnon &amp; White, 1985).</p>
+
+<!-- ============ 3. METODE ============ -->
+<h2>3. Metode</h2>
+<h3>3.1 Dataset dan Variabel</h3>
+<p>Penelitian menggunakan dataset publik Fuel Consumption 2000&ndash;2022 (Yilmaz, n.d.) yang memuat 22.556 baris dan 13 kolom spesifikasi kendaraan. Respons adalah konsumsi bahan bakar gabungan comb_l_100km dari kolom COMB (L/100 km). Prediktor numerik yang dipertimbangkan: ukuran mesin (liter), jumlah silinder, tahun model, dan jumlah gigi. Prediktor kategori: jenis bahan bakar, kelas kendaraan, dan tipe transmisi.</p>
+<h3>3.2 Persiapan Data</h3>
+<p>Data mentah tidak memuat nilai hilang sehingga tidak diperlukan imputasi. Satu baris duplikat persis dihapus karena produsen kerap mencatat konfigurasi trim identik sebagai baris tersendiri, menyisakan 22.555 baris efektif. Label kelas kendaraan dirapikan karena memuat penulisan berbeda untuk makna sama (mis. "SUV - SMALL" dan "SUV: Small"), sehingga jumlah kelas menyusut dari 32 menjadi 17. Kolom transmisi dipecah menjadi tipe transmisi dan jumlah gigi; transmisi variabel kontinu (CVT) tidak memiliki gigi tetap sehingga jumlah giginya ditetapkan nol sebagai konvensi.</p>
+<h3>3.3 Kerangka Analisis Bertahap</h3>
+<p class="ni">Analisis dilakukan dalam lima tahap: (1) <b>eksplorasi data</b> &mdash; memetakan peran kolom, meringkas distribusi, memeriksa pola lewat pair plot dan boxplot; (2) <b>seleksi fitur</b> &mdash; menilai korelasi prediktor terhadap respons dan antarprediktor; (3) <b>pembentukan model</b> &mdash; one-hot encoding, pembagian latih/uji, dan perbandingan model linear vs polinomial; (4) <b>validasi asumsi</b> &mdash; Breusch-Pagan dan Jarque-Bera dengan diagnostik visual; (5) <b>penyempurnaan inferensi</b> &mdash; standard error robust HC3 dan pelaporan koefisien beserta selang kepercayaan.</p>
+<h3>3.4 Aturan Seleksi Fitur</h3>
+<p>Prediktor dinilai dari kekuatan korelasi dengan respons dan tingkat kolinieritas dengan prediktor lain. Prediktor dengan korelasi marginal yang dapat diabaikan menjadi kandidat dibuang. Untuk prediktor yang saling kolinier, keputusan tidak hanya berdasar korelasi tetapi juga uji ablasi pada data uji, yang membandingkan model lengkap dengan model tanpa prediktor tertentu untuk menilai apakah ia benar-benar menambah daya prediksi.</p>
+<h3>3.5 Estimasi dan Evaluasi</h3>
+<p>Data dibagi latih/uji 80:20 dengan random state tetap demi reproduktibilitas (latih 18.044 baris, uji 4.511 baris). Subset uji ditahan dan hanya dipakai menilai generalisasi. Model diestimasi dengan OLS memakai pustaka Python pandas (McKinney, 2010), statsmodels (Seabold &amp; Perktold, 2010), dan scikit-learn (Pedregosa dkk., 2011). Kualitas prediksi diukur dengan R-squared, RMSE, dan MAE; RMSE dan MAE dinyatakan dalam satuan asli L/100 km.</p>
+
+<!-- ============ 4. HASIL DAN PEMBAHASAN ============ -->
+<h2>4. Hasil dan Pembahasan</h2>
+<h3>4.1 Statistik Deskriptif</h3>
+<p>Tabel 1 menyajikan statistik deskriptif variabel numerik. Ukuran mesin berkisar 0,8&ndash;8,4 liter dengan median 3,0 liter, jumlah silinder terpusat pada 4/6/8, dan tahun model tersebar merata 2000&ndash;2022. Respons condong ke kanan dengan mayoritas kendaraan pada 9&ndash;13 L/100 km dan ekor tipis melampaui 20 L/100 km. Pada komposisi kategori, Regular dan Premium gasoline mendominasi (11.822 dan 9.315 kendaraan) sedangkan Diesel dan Natural gas langka (314 dan 33); kelas Compact, Mid size, dan SUV paling sering muncul; transmisi otomatis paling banyak (8.690).</p>
+
+<table class="tbl">
+<caption>Tabel 1. Statistik deskriptif variabel numerik (n = 22.555)</caption>
+<thead>
+<tr><th>Variabel</th><th class="num">Mean</th><th class="num">Std</th><th class="num">Min</th><th class="num">Q1</th><th class="num">Median</th><th class="num">Q3</th><th class="num">Max</th></tr>
+</thead>
+<tbody>
+<tr><td>Ukuran mesin (L)</td><td class="num">3,357</td><td class="num">1,335</td><td class="num">0,8</td><td class="num">2,3</td><td class="num">3,0</td><td class="num">4,2</td><td class="num">8,4</td></tr>
+<tr><td>Jumlah silinder</td><td class="num">5,854</td><td class="num">1,820</td><td class="num">2</td><td class="num">4</td><td class="num">6</td><td class="num">8</td><td class="num">16</td></tr>
+<tr><td>Tahun model</td><td class="num">2011,6</td><td class="num">6,298</td><td class="num">2000</td><td class="num">2006</td><td class="num">2012</td><td class="num">2017</td><td class="num">2022</td></tr>
+<tr><td>Jumlah gigi</td><td class="num">5,635</td><td class="num">1,957</td><td class="num">0</td><td class="num">5</td><td class="num">6</td><td class="num">6</td><td class="num">10</td></tr>
+<tr><td>comb_l_100km</td><td class="num">11,034</td><td class="num">2,911</td><td class="num">3,6</td><td class="num">9,1</td><td class="num">10,6</td><td class="num">12,7</td><td class="num">26,1</td></tr>
+</tbody>
+</table>
+
+<h3>4.2 Eksplorasi Visual</h3>
+<p>Pair plot (Gambar 1) memperlihatkan pola menanjak yang jelas antara ukuran mesin, jumlah silinder, dan konsumsi; jumlah silinder dan jumlah gigi bernilai diskret sehingga sebarannya membentuk pola vertikal; tahun model hampir datar terhadap konsumsi (korelasi mendekati nol). Hubungan tiap prediktor numerik dengan respons mendekati garis lurus, mendukung pemakaian model linear. Boxplot per kategori (Gambar 2&ndash;4) menegaskan ketiga faktor kategori membedakan konsumsi: Diesel paling hemat sedangkan Ethanol E85 dan Natural gas paling boros; kelas kendaraan menanjak dari sedan kecil ke van dan pikap; tipe transmisi berbeda lebih landai namun sistematis. Karena setiap faktor menggeser median konsumsi antar kategori, ketiganya layak masuk model melalui one-hot encoding.</p>
+
+<figure><img src="figs/fig_pairplot.png" style="max-height:68mm;"><figcaption>Gambar 1. Pair plot variabel numerik pada sampel acak 3.000 baris.</figcaption></figure>
+
+<figure><img src="figs/fig_box_fuel.png" style="max-height:34mm;"><figcaption>Gambar 2. Distribusi comb_l_100km menurut jenis bahan bakar.</figcaption></figure>
+
+<figure><img src="figs/fig_box_vclass.png" style="max-height:72mm;"><figcaption>Gambar 3. Distribusi comb_l_100km menurut kelas kendaraan.</figcaption></figure>
+
+<figure><img src="figs/fig_box_trans.png" style="max-height:36mm;"><figcaption>Gambar 4. Distribusi comb_l_100km menurut tipe transmisi.</figcaption></figure>
+
+<h3>4.3 Analisis Korelasi dan Seleksi Fitur</h3>
+<p>Tabel 2 merangkum korelasi Pearson dan Spearman prediktor numerik terhadap respons serta antara ukuran mesin dan jumlah silinder (matriks lengkap pada Gambar A1&ndash;A2 di Lampiran). Putusan diambil dengan membandingkan selang kepercayaan 95 persen koefisien terhadap ambang praktis 0,1, bukan p-value: pada n &asymp; 22.555 p-value hampir selalu signifikan karena hanya menanyakan apakah korelasi tepat nol, sehingga tidak dapat membedakan korelasi yang berarti dari yang dapat diabaikan. Selisih Spearman&minus;Pearson kecil dan positif (sekitar 0,04 untuk ukuran mesin dan 0,05 untuk jumlah silinder), menandakan kelengkungan monoton sangat ringan sehingga Pearson tetap sah dibaca sebagai kekuatan linear; temuan ini mendasari pengujian suku kuadratik yang keputusannya diserahkan pada data uji.</p>
+
+<table class="tbl">
+<caption>Tabel 2. Korelasi prediktor numerik (terhadap comb_l_100km, dan antarprediktor)</caption>
+<thead>
+<tr><th>Pasangan</th><th class="num">Pearson</th><th class="num">Spearman</th><th>Putusan</th></tr>
+</thead>
+<tbody>
+<tr><td>Ukuran mesin terhadap respons</td><td class="num">0,807</td><td class="num">0,845</td><td>Berarti</td></tr>
+<tr><td>Jumlah silinder terhadap respons</td><td class="num">0,772</td><td class="num">0,818</td><td>Berarti</td></tr>
+<tr><td>Tahun model terhadap respons</td><td class="num">-0,068</td><td class="num">-0,073</td><td>Dapat diabaikan</td></tr>
+<tr><td>Ukuran mesin terhadap jumlah silinder</td><td class="num">0,913</td><td class="num">0,936</td><td>Kolinier</td></tr>
+</tbody>
+</table>
+
+<p>Tabel 3 mendokumentasikan keputusan seleksi fitur. Ukuran mesin dipertahankan karena paling kuat berhubungan dengan respons; jumlah silinder dipertahankan meski hampir kolinier karena korelasinya bukan sempurna dan uji ablasi (Subbab 4.7) membuktikan ia menambah daya prediksi; tahun model dibuang karena korelasinya dapat diabaikan; jumlah gigi dan ketiga variabel kategori dipertahankan karena boxplot menunjukkan kaitan sistematis dengan konsumsi.</p>
+
+<table class="tbl">
+<caption>Tabel 3. Keputusan seleksi fitur</caption>
+<thead><tr><th>Prediktor</th><th>Keputusan</th><th>Alasan ringkas</th></tr></thead>
+<tbody>
+<tr><td>Ukuran mesin</td><td>Pertahankan</td><td>Korelasi paling kuat dengan respons</td></tr>
+<tr><td>Jumlah silinder</td><td>Pertahankan</td><td>Kolinier, namun terbukti menambah prediksi (ablasi)</td></tr>
+<tr><td>Tahun model</td><td>Buang</td><td>Korelasi dengan respons dapat diabaikan</td></tr>
+<tr><td>Jumlah gigi</td><td>Pertahankan</td><td>Transmisi berkaitan dengan konsumsi</td></tr>
+<tr><td>Jenis bahan bakar</td><td>Pertahankan</td><td>Median konsumsi bergeser antar kategori</td></tr>
+<tr><td>Kelas kendaraan</td><td>Pertahankan</td><td>Median konsumsi bergeser antar kategori</td></tr>
+<tr><td>Tipe transmisi</td><td>Pertahankan</td><td>Median konsumsi bergeser antar kategori</td></tr>
+</tbody>
+</table>
+
+<h3>4.4 Pembentukan Model dan Pemilihan Bentuk Fungsional</h3>
+<p>Variabel kategori diubah menjadi kolom indikator dengan acuan Diesel (bahan bakar), Compact (kelas), dan transmisi otomatis (transmisi), menghasilkan 24 kolom indikator. Bersama tiga prediktor numerik, model linear memakai 27 fitur ditambah satu konstanta. Karena perbandingan Pearson&ndash;Spearman menandai kelengkungan kecil pada ukuran mesin, model linear dibandingkan dengan model polinomial bersuku kuadratik ukuran mesin. Tabel 4 menunjukkan pada data uji keduanya praktis setara padahal polinomial memakai satu parameter lebih banyak, sehingga model linear yang lebih sederhana dipilih sesuai prinsip parsimoni.</p>
+
+<table class="tbl">
+<caption>Tabel 4. Perbandingan model linear dan polinomial</caption>
+<thead><tr><th>Model</th><th class="num">Jumlah parameter</th><th class="num">R-squared latih</th><th class="num">R-squared uji</th></tr></thead>
+<tbody>
+<tr><td>Linear</td><td class="num">28</td><td class="num">0,8342</td><td class="num">0,8365</td></tr>
+<tr><td>Polinomial (ukuran mesin kuadratik)</td><td class="num">29</td><td class="num">0,8344</td><td class="num">0,8364</td></tr>
+</tbody>
+</table>
+
+<h3>4.5 Model Final dan Interpretasi Koefisien</h3>
+<p>Tabel 5 menyajikan koefisien model linear final beserta standard error, p-value, dan selang kepercayaan 95 persen, seluruhnya berbasis kovarians robust HC3 (Subbab 4.6). Koefisien numerik dibaca sebagai perubahan konsumsi per kenaikan satu satuan prediktor; koefisien kategori sebagai selisih konsumsi terhadap kategori acuan; konstanta mewakili kategori acuan saat prediktor numerik nol dan tidak ditafsir harfiah karena di luar rentang data. Ukuran mesin dan jumlah silinder positif (dibaca bersama sebagai ukuran kapasitas mesin), jumlah gigi negatif (lebih banyak rasio cenderung sedikit lebih hemat), Diesel paling hemat sedangkan Ethanol E85 paling boros, transmisi variabel kontinu paling hemat, dan kelas kendaraan menunjukkan gradien jelas dari mobil kecil ke van/pikap. Kelas Full size dan Mid size tidak signifikan (p besar), berarti konsumsinya tidak berbeda nyata dari acuan Compact.</p>
+
+<table class="tbl">
+<caption>Tabel 5. Koefisien model linear final dengan standard error robust HC3</caption>
+<thead>
+<tr><th>Variabel</th><th class="num">Koef.</th><th class="num">SE (HC3)</th><th class="num">p</th><th class="num">CI bawah</th><th class="num">CI atas</th></tr>
+</thead>
+<tbody>
+<tr><td>Konstanta</td><td class="num">3,1407</td><td class="num">0,0868</td><td class="num">&lt;0,001</td><td class="num">2,971</td><td class="num">3,311</td></tr>
+<tr><td>Ukuran mesin</td><td class="num">0,6438</td><td class="num">0,0264</td><td class="num">&lt;0,001</td><td class="num">0,592</td><td class="num">0,696</td></tr>
+<tr><td>Jumlah silinder</td><td class="num">0,5740</td><td class="num">0,0185</td><td class="num">&lt;0,001</td><td class="num">0,538</td><td class="num">0,610</td></tr>
+<tr><td>Jumlah gigi</td><td class="num">-0,0518</td><td class="num">0,0075</td><td class="num">&lt;0,001</td><td class="num">-0,066</td><td class="num">-0,037</td></tr>
+<tr><td>Bahan bakar: Ethanol E85 (E)</td><td class="num">5,4887</td><td class="num">0,0758</td><td class="num">&lt;0,001</td><td class="num">5,340</td><td class="num">5,637</td></tr>
+<tr><td>Bahan bakar: Natural gas (N)</td><td class="num">3,7854</td><td class="num">0,2542</td><td class="num">&lt;0,001</td><td class="num">3,287</td><td class="num">4,284</td></tr>
+<tr><td>Bahan bakar: Premium gasoline (Z)</td><td class="num">2,0951</td><td class="num">0,0574</td><td class="num">&lt;0,001</td><td class="num">1,983</td><td class="num">2,208</td></tr>
+<tr><td>Bahan bakar: Regular gasoline (X)</td><td class="num">1,4221</td><td class="num">0,0569</td><td class="num">&lt;0,001</td><td class="num">1,311</td><td class="num">1,534</td></tr>
+<tr><td>Kelas: Full size</td><td class="num">0,0155</td><td class="num">0,0435</td><td class="num">0,721</td><td class="num">-0,070</td><td class="num">0,101</td></tr>
+<tr><td>Kelas: Mid size</td><td class="num">0,0016</td><td class="num">0,0304</td><td class="num">0,958</td><td class="num">-0,058</td><td class="num">0,061</td></tr>
+<tr><td>Kelas: Minicompact</td><td class="num">-0,1952</td><td class="num">0,0441</td><td class="num">&lt;0,001</td><td class="num">-0,282</td><td class="num">-0,109</td></tr>
+<tr><td>Kelas: Minivan</td><td class="num">1,0503</td><td class="num">0,0490</td><td class="num">&lt;0,001</td><td class="num">0,954</td><td class="num">1,147</td></tr>
+<tr><td>Kelas: Pickup truck small</td><td class="num">2,0659</td><td class="num">0,0553</td><td class="num">&lt;0,001</td><td class="num">1,958</td><td class="num">2,174</td></tr>
+<tr><td>Kelas: Pickup truck standard</td><td class="num">1,9945</td><td class="num">0,0431</td><td class="num">&lt;0,001</td><td class="num">1,910</td><td class="num">2,079</td></tr>
+<tr><td>Kelas: Special purpose vehicle</td><td class="num">1,9189</td><td class="num">0,0911</td><td class="num">&lt;0,001</td><td class="num">1,740</td><td class="num">2,098</td></tr>
+<tr><td>Kelas: Station wagon mid size</td><td class="num">0,5699</td><td class="num">0,0469</td><td class="num">&lt;0,001</td><td class="num">0,478</td><td class="num">0,662</td></tr>
+<tr><td>Kelas: Station wagon small</td><td class="num">0,3136</td><td class="num">0,0406</td><td class="num">&lt;0,001</td><td class="num">0,234</td><td class="num">0,393</td></tr>
+<tr><td>Kelas: Subcompact</td><td class="num">0,0939</td><td class="num">0,0359</td><td class="num">0,009</td><td class="num">0,024</td><td class="num">0,164</td></tr>
+<tr><td>Kelas: SUV</td><td class="num">1,5188</td><td class="num">0,0365</td><td class="num">&lt;0,001</td><td class="num">1,447</td><td class="num">1,590</td></tr>
+<tr><td>Kelas: SUV small</td><td class="num">1,3675</td><td class="num">0,0364</td><td class="num">&lt;0,001</td><td class="num">1,296</td><td class="num">1,439</td></tr>
+<tr><td>Kelas: SUV standard</td><td class="num">1,7452</td><td class="num">0,0527</td><td class="num">&lt;0,001</td><td class="num">1,642</td><td class="num">1,848</td></tr>
+<tr><td>Kelas: Two seater</td><td class="num">0,4444</td><td class="num">0,0598</td><td class="num">&lt;0,001</td><td class="num">0,327</td><td class="num">0,562</td></tr>
+<tr><td>Kelas: Van cargo</td><td class="num">2,6157</td><td class="num">0,0718</td><td class="num">&lt;0,001</td><td class="num">2,475</td><td class="num">2,757</td></tr>
+<tr><td>Kelas: Van passenger</td><td class="num">3,9195</td><td class="num">0,1053</td><td class="num">&lt;0,001</td><td class="num">3,713</td><td class="num">4,126</td></tr>
+<tr><td>Transmisi: Automated manual (AM)</td><td class="num">0,4672</td><td class="num">0,0573</td><td class="num">&lt;0,001</td><td class="num">0,355</td><td class="num">0,580</td></tr>
+<tr><td>Transmisi: Automatic select shift (AS)</td><td class="num">0,1310</td><td class="num">0,0224</td><td class="num">&lt;0,001</td><td class="num">0,087</td><td class="num">0,175</td></tr>
+<tr><td>Transmisi: Continuously variable (AV)</td><td class="num">-1,6222</td><td class="num">0,0646</td><td class="num">&lt;0,001</td><td class="num">-1,749</td><td class="num">-1,496</td></tr>
+<tr><td>Transmisi: Manual (M)</td><td class="num">0,1623</td><td class="num">0,0253</td><td class="num">&lt;0,001</td><td class="num">0,113</td><td class="num">0,212</td></tr>
+</tbody>
+</table>
+
+<h3>4.6 Validasi Asumsi dan Penyempurnaan Inferensi HC3</h3>
+<p>Validasi dilakukan pada homoskedastisitas dan normalitas; independensi tidak diuji formal karena data cross-sectional sehingga urutan baris tidak bermakna. Tabel 6 merangkum hasil uji formal dan magnitudo penyimpangan. Breusch-Pagan menolak homoskedastisitas dan Jarque-Bera menolak normalitas, namun wajar pada sampel besar; karena itu pembacaan dilengkapi magnitudo (skewness, excess kurtosis, dan proporsi variansi residual kuadrat yang dijelaskan prediktor). Diagnostik visual (Gambar 5) memperkuatnya: Q-Q plot mengikuti garis 45 derajat di bagian tengah dengan penyimpangan di ekor, dan plot residual terhadap prediksi sedikit melebar seperti corong (heteroskedastisitas) tanpa lengkungan sistematis sehingga spesifikasi linear memadai.</p>
+
+<table class="tbl">
+<caption>Tabel 6. Hasil uji asumsi dan magnitudo penyimpangan</caption>
+<thead><tr><th>Aspek</th><th>Uji dan magnitudo</th><th>Pembacaan</th></tr></thead>
+<tbody>
+<tr><td>Homoskedastisitas</td><td>Breusch-Pagan, R-squared auxiliary = 0,083</td><td>Heteroskedastik ringan&ndash;sedang</td></tr>
+<tr><td>Normalitas (kemiringan)</td><td>Skewness = 0,42</td><td>Kemiringan dapat diabaikan</td></tr>
+<tr><td>Normalitas (ekor)</td><td>Excess kurtosis = 2,14</td><td>Ekor lebih tebal dari normal</td></tr>
+</tbody>
+</table>
+
+<figure><img src="figs/fig_residual.png" style="max-height:52mm;"><figcaption>Gambar 5. Diagnostik residual model final. Q-Q plot (kiri) dan plot residual terhadap nilai prediksi (kanan).</figcaption></figure>
+
+<p>Karena heteroskedastisitas terkonfirmasi, standard error klasik diganti dengan standard error robust HC3. Penggantian ini tidak mengubah estimasi titik sama sekali, hanya memperbaiki ukuran ketidakpastian. Tabel 7 menunjukkan standard error ukuran mesin dan jumlah silinder naik sekitar 40 persen sedangkan sebagian koefisien bahan bakar justru turun, bukti langsung bahwa standard error klasik kurang tepat saat heteroskedastik. Varian HC3 dipilih karena paling konservatif, dan pada sampel besar selisih antar varian HC hampir nol sehingga memilih yang teraman tidak merugikan.</p>
+
+<table class="tbl">
+<caption>Tabel 7. Perbandingan standard error klasik dan HC3 (sampel koefisien)</caption>
+<thead><tr><th>Koefisien</th><th class="num">SE klasik</th><th class="num">SE HC3</th><th class="num">Rasio HC3/klasik</th></tr></thead>
+<tbody>
+<tr><td>Ukuran mesin</td><td class="num">0,0185</td><td class="num">0,0264</td><td class="num">1,43</td></tr>
+<tr><td>Jumlah silinder</td><td class="num">0,0131</td><td class="num">0,0185</td><td class="num">1,41</td></tr>
+<tr><td>Bahan bakar: Premium gasoline (Z)</td><td class="num">0,0782</td><td class="num">0,0574</td><td class="num">0,73</td></tr>
+<tr><td>Kelas: Van passenger</td><td class="num">0,0859</td><td class="num">0,1053</td><td class="num">1,23</td></tr>
+</tbody>
+</table>
+
+<h3>4.7 Uji Ablasi dan Evaluasi Generalisasi</h3>
+<p>Uji ablasi menegaskan dua keputusan seleksi fitur. Membuang jumlah silinder menurunkan R-squared uji sekitar 0,02 (dari 0,8365 menjadi 0,8168); penurunan konsisten pada data uji menandakan informasi nyata, bukan overfitting. Sebaliknya, menambahkan kembali tahun model praktis tidak mengubah R-squared uji dan koefisiennya tidak signifikan (p &asymp; 0,852). Tabel 8 menunjukkan selisih metrik latih&ndash;uji sangat kecil sehingga tidak ada indikasi overfitting; RMSE uji sekitar 1,18 L/100 km dan MAE uji sekitar 0,89 L/100 km berarti prediksi tipikal meleset sekitar satu liter per 100 km. Secara keseluruhan model menjelaskan sekitar 84 persen variansi; sisanya berasal dari faktor tak dimodelkan seperti bobot kendaraan, aerodinamika, dan jenis penggerak.</p>
+
+<table class="tbl">
+<caption>Tabel 8. Evaluasi generalisasi model final</caption>
+<thead><tr><th>Metrik</th><th class="num">Latih</th><th class="num">Uji</th><th class="num">Selisih (latih&minus;uji)</th></tr></thead>
+<tbody>
+<tr><td>R-squared</td><td class="num">0,8342</td><td class="num">0,8365</td><td class="num">-0,0023</td></tr>
+<tr><td>RMSE (L/100 km)</td><td class="num">1,1857</td><td class="num">1,1757</td><td class="num">0,0101</td></tr>
+<tr><td>MAE (L/100 km)</td><td class="num">0,8962</td><td class="num">0,8941</td><td class="num">0,0020</td></tr>
+</tbody>
+</table>
+
+<!-- ============ 5. KESIMPULAN ============ -->
+<h2>5. Kesimpulan dan Saran</h2>
+<p>Penelitian memodelkan konsumsi bahan bakar gabungan kendaraan dengan regresi linear berganda dan one-hot encoding melalui kerangka analisis bertahap. Seleksi fitur mempertahankan ukuran mesin, jumlah silinder, dan jumlah gigi sebagai prediktor numerik serta jenis bahan bakar, kelas kendaraan, dan tipe transmisi sebagai kategori. Tahun model dibuang karena korelasinya dapat diabaikan; jumlah silinder dipertahankan karena ablasi membuktikan ia menambah akurasi meski kolinier; suku kuadratik tidak diperlukan karena tidak menaikkan R-squared uji. Model akhir menjelaskan sekitar 84 persen variansi dengan RMSE uji sekitar 1,18 L/100 km tanpa overfitting, dengan penggerak utama jenis bahan bakar, kelas kendaraan, dan ukuran mesin.</p>
+<p>Keterbatasan: Breusch-Pagan dan Jarque-Bera menolak homoskedastisitas dan normalitas, wajar pada sampel besar dan tidak membatalkan estimasi titik; standard error robust HC3 sudah menangani heteroskedastisitas sehingga p-value dan selang kepercayaan dapat ditafsirkan sebagaimana mestinya. Non-normalitas berekor tebal tidak fatal bagi prediksi titik berkat Central Limit Theorem namun membuat interval prediksi kurang terkalibrasi di ekor. Independensi tidak diuji sehingga kemungkinan korelasi dalam grup antar varian dari model kendaraan yang sama masih terbuka; model bersifat asosiatif, bukan kausal. Untuk penelitian lanjutan disarankan menambahkan prediktor seperti bobot kendaraan dan aerodinamika, menerapkan standard error berbasis cluster per model kendaraan, dan mengeksplorasi metode interval prediksi yang lebih terkalibrasi pada data berekor tebal.</p>
+
+<!-- ============ UCAPAN ============ -->
+<h2>Ucapan Terima Kasih</h2>
+<p>Penulis berterima kasih kepada dosen pengampu mata kuliah Probabilitas dan Statistika atas bimbingannya, serta kepada penyedia dataset publik Fuel Consumption 2000&ndash;2022 yang memungkinkan analisis ini.</p>
+
+<!-- ============ DAFTAR PUSTAKA ============ -->
+<h2>Daftar Pustaka</h2>
+<div class="refs">
+<p>Breusch, T. S., &amp; Pagan, A. R. (1979). A simple test for heteroscedasticity and random coefficient variation. <i>Econometrica, 47</i>(5), 1287&ndash;1294.</p>
+<p>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2013). <i>An introduction to statistical learning with applications in R.</i> Springer.</p>
+<p>Jarque, C. M., &amp; Bera, A. K. (1980). Efficient tests for normality, homoscedasticity and serial independence of regression residuals. <i>Economics Letters, 6</i>(3), 255&ndash;259.</p>
+<p>MacKinnon, J. G., &amp; White, H. (1985). Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties. <i>Journal of Econometrics, 29</i>(3), 305&ndash;325.</p>
+<p>McKinney, W. (2010). Data structures for statistical computing in Python. <i>Proceedings of the 9th Python in Science Conference</i>, 56&ndash;61.</p>
+<p>Montgomery, D. C., Peck, E. A., &amp; Vining, G. G. (2012). <i>Introduction to linear regression analysis</i> (5th ed.). John Wiley &amp; Sons.</p>
+<p>Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., … Duchesnay, É. (2011). Scikit-learn: Machine learning in Python. <i>Journal of Machine Learning Research, 12</i>, 2825&ndash;2830.</p>
+<p>Seabold, S., &amp; Perktold, J. (2010). Statsmodels: Econometric and statistical modeling with Python. <i>Proceedings of the 9th Python in Science Conference</i>, 92&ndash;96.</p>
+<p>Spearman, C. (1904). The proof and measurement of association between two things. <i>The American Journal of Psychology, 15</i>(1), 72&ndash;101.</p>
+<p>Yilmaz, A. (n.d.). <i>Fuel consumption (2000&ndash;2022)</i> [Data set]. Kaggle. Diakses 7 Juni 2026, dari https://www.kaggle.com/datasets/ahmettyilmazz/fuel-consumption</p>
+</div>
+
+<!-- ============ LAMPIRAN ============ -->
+<h2>Lampiran A. Matriks Korelasi Lengkap</h2>
+<p class="ni">Matriks korelasi berikut menyajikan nilai yang telah diringkas pada Tabel 2.</p>
+<figure><img src="figs/fig_corr_pearson.png" style="max-height:66mm;"><figcaption>Gambar A1. Matriks korelasi Pearson antar variabel numerik.</figcaption></figure>
+<figure><img src="figs/fig_corr_spearman.png" style="max-height:66mm;"><figcaption>Gambar A2. Matriks korelasi Spearman antar variabel numerik.</figcaption></figure>
+
+</body>
+</html>

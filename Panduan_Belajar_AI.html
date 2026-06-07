@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Panduan Belajar — Regresi Linear Berganda untuk Konsumsi Bahan Bakar</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Calibri, Arial, sans-serif;
+    font-size: 11pt; line-height: 1.55; color: #1a1a1a; margin: 0;
+  }
+  h1 { font-size: 22pt; color: #0b3d66; margin: 0 0 4px; line-height: 1.2; }
+  h2 {
+    font-size: 15.5pt; color: #0b3d66; margin: 26px 0 8px;
+    border-bottom: 3px solid #0b3d66; padding-bottom: 4px;
+    page-break-after: avoid;
+  }
+  h3 { font-size: 12.5pt; color: #14507f; margin: 18px 0 6px; page-break-after: avoid; }
+  h4 { font-size: 11pt; color: #333; margin: 12px 0 4px; }
+  p { margin: 6px 0; text-align: justify; }
+  ul, ol { margin: 6px 0 6px 0; padding-left: 22px; }
+  li { margin: 3px 0; }
+  code {
+    font-family: "Consolas", "Courier New", monospace; font-size: 9.6pt;
+    background: #eef2f6; padding: 1px 4px; border-radius: 3px; color: #b3005a;
+  }
+  .formula {
+    font-family: "Cambria Math", "Consolas", serif; font-size: 11pt;
+    background: #f4f7fa; border-left: 4px solid #8aa6bd;
+    padding: 8px 12px; margin: 8px 0; text-align: center;
+    border-radius: 4px; white-space: pre-wrap;
+  }
+  .box { padding: 9px 13px; margin: 9px 0; border-radius: 6px; page-break-inside: avoid; }
+  .analogi { background: #fff5e6; border-left: 4px solid #e8901a; }
+  .analogi::before { content: "🔎 Analogi sehari-hari"; display:block; font-weight:700; color:#9c5a00; margin-bottom:3px; font-size:10pt;}
+  .kenapa { background: #e9f3fb; border-left: 4px solid #1d72c2; }
+  .kenapa::before { content: "💡 Kenapa diputuskan begini?"; display:block; font-weight:700; color:#0f4d8a; margin-bottom:3px; font-size:10pt;}
+  .ingat { background: #eafaf0; border-left: 4px solid #1e9e5a; }
+  .ingat::before { content: "✅ Inti yang harus diingat"; display:block; font-weight:700; color:#136b3c; margin-bottom:3px; font-size:10pt;}
+  .awas { background: #fdecec; border-left: 4px solid #d23b3b; }
+  .awas::before { content: "⚠️ Hati-hati / salah kaprah"; display:block; font-weight:700; color:#9c1a1a; margin-bottom:3px; font-size:10pt;}
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 9.8pt; }
+  th, td { border: 1px solid #c4d0db; padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { background: #0b3d66; color: #fff; }
+  tr:nth-child(even) td { background: #f3f7fa; }
+  .cover {
+    text-align: center; padding: 40px 10px 10px; border-bottom: 4px double #0b3d66; margin-bottom: 10px;
+  }
+  .cover .sub { font-size: 13pt; color: #444; margin-top: 8px; }
+  .meta { font-size: 10pt; color: #666; margin-top: 14px; }
+  .toc { background:#f4f7fa; border:1px solid #c4d0db; border-radius:6px; padding:10px 18px; }
+  .toc li { margin: 2px 0; }
+  .phase-tag {
+    display:inline-block; background:#0b3d66; color:#fff; font-size:8.5pt;
+    padding:2px 8px; border-radius:10px; margin-bottom:4px; letter-spacing:.3px;
+  }
+  .pagebreak { page-break-before: always; }
+  strong { color: #11334d; }
+  .small { font-size: 9.4pt; color:#555; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Panduan Belajar Lengkap</h1>
+  <div class="sub">Memahami <code>AI.ipynb</code> — Pemodelan Konsumsi Bahan Bakar Kendaraan<br>
+  dengan <strong>Regresi Linear Berganda</strong> + <strong>One-Hot Encoding</strong></div>
+  <div class="meta">
+    Bahan belajar mata kuliah Statistika &middot; Disusun ulang dari notebook tim "Info Ngopi"<br>
+    (Amadeus Eugene Dirgantara, Rei Putra Soemanto, Jason Tio)
+  </div>
+</div>
+
+<p>Dokumen ini menjelaskan <strong>semua konsep</strong> yang dipakai di notebook, dari nol, dengan bahasa sederhana, analogi sehari-hari, dan — yang paling penting — <strong>alasan di balik setiap keputusan</strong>. Tujuannya bukan menghafal kode, tapi memahami <em>kenapa</em> tiap langkah ada, sehingga kamu bisa menjawab pertanyaan dosen seperti "kenapa kalian buang <code>year</code>?" atau "kenapa pakai HC3?".</p>
+
+<div class="toc">
+<strong>Daftar Isi</strong>
+<ol>
+  <li>Gambaran Besar: Apa yang Sedang Kita Kerjakan?</li>
+  <li>Dua Konsep Judul: Regresi Linear Berganda &amp; One-Hot Encoding</li>
+  <li>Fase 1 — Eksplorasi Data &amp; Pra-pemrosesan</li>
+  <li>Membersihkan &amp; Merapikan Data (Feature Engineering)</li>
+  <li>Statistik Deskriptif &amp; Visualisasi (Pair Plot, Boxplot)</li>
+  <li>Korelasi: Pearson, Spearman, dan Perangkap p-value</li>
+  <li>Seleksi Fitur: Memilih Apa yang Masuk Model</li>
+  <li>One-Hot Encoding &amp; Dummy Variable Trap</li>
+  <li>Train/Test Split</li>
+  <li>Melatih Model: OLS, Linear vs Polinomial, Parsimoni</li>
+  <li>Menilai Model: R², RMSE, MAE, F-statistic</li>
+  <li>Membaca Koefisien (Ceteris Paribus)</li>
+  <li>Validasi Asumsi: 4 Syarat OLS</li>
+  <li>Uji Homoskedastisitas (Breusch-Pagan) &amp; Normalitas (Jarque-Bera)</li>
+  <li>Diagnostik Visual: Q-Q Plot &amp; Residual vs Fitted</li>
+  <li>Refinement: Ablasi Fitur &amp; Standard Error Robust (HC3)</li>
+  <li>Kesimpulan &amp; Keterbatasan Model</li>
+  <li>Glosarium Istilah Penting</li>
+</ol>
+</div>
+
+<!-- ============================================================= -->
+<h2 class="pagebreak">1. Gambaran Besar: Apa yang Sedang Kita Kerjakan?</h2>
+
+<p><strong>Tujuan proyek:</strong> memprediksi <strong>konsumsi bahan bakar gabungan</strong> sebuah mobil — kolom <code>comb_l_100km</code>, satuannya liter per 100 km — dari ciri-ciri mobil seperti ukuran mesin, jumlah silinder, jenis bahan bakar, kelas kendaraan, dan transmisi. Data: 22.556 mobil tahun 2000–2022.</p>
+
+<p>Satuan <strong>L/100 km</strong> artinya "berapa liter bensin yang dihabiskan untuk menempuh 100 km". Makin <em>besar</em> angkanya, makin <em>boros</em> mobilnya (kebalikan dari km/liter).</p>
+
+<div class="analogi">
+Bayangkan kamu petugas yang harus menebak "mobil ini bakal seboros apa?" hanya dengan melihat brosur spesifikasinya — belum pernah menyetirnya. Regresi adalah cara matematis untuk membuat tebakan itu dari pola ribuan mobil yang datanya sudah kita punya.
+</div>
+
+<p>Alur kerja keseluruhan mengikuti urutan baku proyek data, dan notebook membaginya menjadi 5 fase:</p>
+<table>
+<tr><th>Fase</th><th>Isi</th><th>Pertanyaan yang dijawab</th></tr>
+<tr><td>1. Eksplorasi &amp; Pra-pemrosesan</td><td>Load, bersihkan, periksa data</td><td>"Datanya seperti apa? Bersih atau kotor?"</td></tr>
+<tr><td>2. Seleksi Fitur</td><td>Pilih variabel, one-hot encoding</td><td>"Variabel mana yang layak masuk model?"</td></tr>
+<tr><td>3. Model Fitting</td><td>Latih model, bandingkan kandidat</td><td>"Model mana yang terbaik?"</td></tr>
+<tr><td>4. Validasi Asumsi</td><td>Cek syarat-syarat OLS</td><td>"Apakah hasil model boleh dipercaya?"</td></tr>
+<tr><td>5. Refinement &amp; Kesimpulan</td><td>Perbaiki inferensi, tarik kesimpulan</td><td>"Apa artinya semua ini & apa batasnya?"</td></tr>
+</table>
+
+<!-- ============================================================= -->
+<h2>2. Dua Konsep Judul: Regresi Linear Berganda &amp; One-Hot Encoding</h2>
+
+<h3>Regresi Linear Berganda (Multiple Linear Regression)</h3>
+<p>"Regresi" = menebak sebuah angka (di sini: keborosan) dari variabel lain. "Linear" = hubungannya digambar sebagai garis lurus. "Berganda" = pakai <em>banyak</em> variabel penjelas sekaligus, bukan cuma satu. Modelnya berbentuk:</p>
+<div class="formula">ŷ = β₀ + β₁·x₁ + β₂·x₂ + … + βₚ·xₚ</div>
+<p>Artinya: prediksi (ŷ) = sebuah titik awal (β₀, intercept) ditambah kontribusi tiap variabel. Tiap <strong>β (beta)</strong> adalah "bobot" — seberapa besar pengaruh variabel itu.</p>
+
+<div class="analogi">
+Bayangkan menghitung total harga belanja: <code>total = ongkir + (harga_apel × jml_apel) + (harga_susu × jml_susu)</code>. Di sini ongkir = intercept β₀, dan tiap "harga satuan" = koefisien β. Regresi berganda otomatis mencari "harga satuan" terbaik untuk tiap faktor agar tebakannya paling mendekati kenyataan.
+</div>
+
+<h3>One-Hot Encoding</h3>
+<p>Masalah: matematika hanya bisa mengalikan <em>angka</em>, sedangkan "jenis bahan bakar" itu <em>teks</em> (Diesel, Bensin, dll). One-hot encoding mengubah satu kolom kategori menjadi beberapa kolom "ya/tidak" (1/0).</p>
+<table>
+<tr><th>fuel (asli)</th><th>fuel_Bensin</th><th>fuel_Ethanol</th><th>fuel_Gas</th></tr>
+<tr><td>Bensin</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>Ethanol</td><td>0</td><td>1</td><td>0</td></tr>
+<tr><td>Diesel (referensi)</td><td>0</td><td>0</td><td>0</td></tr>
+</table>
+<div class="analogi">
+Seperti formulir centang: "Bahan bakar: ☐ Bensin ☐ Ethanol ☐ Gas". Tiap mobil mencentang tepat satu kotak (makanya disebut "one-hot" = satu kotak menyala). Diesel tidak punya kotak sendiri — ia jadi "kondisi default" saat semua kotak kosong.
+</div>
+
+<!-- ============================================================= -->
+<h2 class="pagebreak">3. Fase 1 — Eksplorasi Data &amp; Pra-pemrosesan</h2>
+<span class="phase-tag">FASE 1 · sel notebook 4–11</span>
+
+<h3>Load data &amp; mengenal isinya</h3>
+<p>Data dibaca dengan <code>pd.read_csv(...)</code> ke dalam <code>raw</code>. Perintah <code>.shape</code> menunjukkan ukuran (22.556 baris × banyak kolom), dan <code>.info()</code> menunjukkan tipe tiap kolom (angka vs teks).</p>
+
+<h3>Memeriksa nilai yang hilang (missing values)</h3>
+<p><code>raw.isna().sum()</code> menghitung sel kosong tiap kolom. <strong>Hasil: nol</strong> — tidak ada yang kosong, jadi tidak perlu "imputasi" (mengisi sel kosong dengan tebakan).</p>
+<div class="kenapa">
+Sel kosong bikin perhitungan rusak (tidak bisa dirata-rata/dikali). Memeriksanya di awal mencegah kejutan error di tengah jalan. Karena kosong = 0, langkah pembersihan ini bisa dilewati — tapi <em>tetap diperiksa dulu</em> agar kita yakin, bukan berasumsi.
+</div>
+
+<h3>Membuang baris duplikat</h3>
+<p><code>raw.drop_duplicates()</code> menghapus baris yang identik 100%. Ditemukan <strong>1 baris</strong> duplikat persis dan dibuang.</p>
+<div class="kenapa">
+Baris kembar membuat satu mobil terhitung dua kali, sehingga ia "berteriak lebih keras" dan menarik model ke arahnya secara tidak adil. Satu observasi = satu mobil unik.
+</div>
+
+<h3>Memetakan peran tiap kolom</h3>
+<p>Sebelum memodelkan, tiap kolom diklasifikasikan: <strong>prediktor numerik</strong> (angka kontinu: <code>engine_size</code>, <code>cylinders</code>, <code>year</code>), <strong>prediktor kategorikal</strong> (<code>fuel</code>, <code>vehicle_class</code>, <code>transmission</code>), dan <strong>target</strong> (<code>comb_l_100km</code>, yang ingin diprediksi). <code>.nunique()</code> menghitung berapa nilai unik tiap kolom.</p>
+<div class="ingat">
+Numerik dan kategorikal diperlakukan <em>berbeda</em>: numerik langsung dipakai, kategorikal harus di-one-hot dulu. Makanya pemetaan ini wajib di awal.
+</div>
+
+<!-- ============================================================= -->
+<h2>4. Membersihkan &amp; Merapikan Data (Feature Engineering)</h2>
+<span class="phase-tag">FASE 1 · sel notebook 16–20</span>
+
+<p>Saat melihat isi kolom kategorikal, ditemukan beberapa "kotoran data" khas yang harus dibereskan:</p>
+
+<h4>a) Label sama tapi ditulis beda (vehicle_class)</h4>
+<p>Contoh: <code>"SUV - SMALL"</code> dan <code>"SUV: Small"</code> sebenarnya kelas yang sama, tapi komputer menganggapnya beda karena beda huruf besar/kecil dan beda pemisah (<code>-</code> vs <code>:</code>). Solusi: ubah semua jadi huruf besar dan ganti pemisah jadi spasi. Hasilnya jumlah kelas <strong>menyusut dari 32 menjadi 17</strong>.</p>
+<div class="analogi">
+Seperti merapikan daftar kontak HP: "Budi", "budi", dan "BUDI" sebenarnya satu orang. Kalau tidak digabung, kamu akan kirim 3 ucapan ulang tahun ke orang yang sama.
+</div>
+
+<h4>b) Kode bahan bakar diberi nama (fuel)</h4>
+<p>Data asli cuma berisi kode huruf: D, E, N, X, Z. Diubah jadi <code>"Diesel (D)"</code>, <code>"Ethanol E85 (E)"</code>, dst — nama deskriptif + kode asli, supaya keduanya terbaca.</p>
+
+<h4>c) Memecah kolom transmisi jadi dua (split)</h4>
+<p>Kolom <code>transmission</code> menumpuk dua informasi dalam satu kode, mis. <code>"A6"</code> = tipe <strong>A</strong>utomatic + <strong>6</strong> gigi. Ini dipecah menjadi:</p>
+<ul>
+  <li><code>transmission_type</code> — tipe (A, AM, AS, AV, M) → kategorikal</li>
+  <li><code>n_gears</code> — jumlah gigi (angka) → numerik</li>
+</ul>
+<p><strong>Kasus khusus CVT (tipe AV):</strong> transmisi "Continuously Variable" tidak punya gigi diskret (rasionya berubah mulus tanpa tingkat), jadi <code>n_gears</code> diberi nilai <strong>0</strong> sebagai konvensi.</p>
+<div class="kenapa">
+Dua informasi berbeda yang ditumpuk dalam satu kolom membatasi model: ia tidak bisa belajar "efek jumlah gigi" terpisah dari "efek tipe transmisi". Dengan dipecah, model bisa menimbang keduanya sendiri-sendiri. Ini contoh <strong>feature engineering</strong>: membentuk fitur yang lebih informatif dari data mentah.
+</div>
+<div class="awas">
+Nilai <code>n_gears = 0</code> untuk CVT itu <em>konvensi buatan</em>, bukan "nol gigi sungguhan". Inilah sebabnya nanti <code>n_gears</code> tidak ikut dihitung korelasinya secara mentah — angka 0 buatan bisa menyesatkan.
+</div>
+
+<!-- ============================================================= -->
+<h2 class="pagebreak">5. Statistik Deskriptif &amp; Visualisasi</h2>
+<span class="phase-tag">FASE 1 · sel notebook 22–30</span>
+
+<h3>Statistik deskriptif (<code>.describe()</code>)</h3>
+<p>Merangkum tiap kolom numerik: rata-rata, min, max, dan persebaran. Tujuannya kenalan dulu dengan skala data: ukuran mesin ~1–8 L, silinder umumnya 4/6/8, gigi 0–10.</p>
+<div class="kenapa">
+Ini "pemeriksaan kewarasan" data. Kalau ada ukuran mesin 500 L atau silinder negatif, berarti ada kesalahan input yang harus dibereskan sebelum lanjut.
+</div>
+
+<h3>Pair plot (sel 26)</h3>
+<p>Matriks scatter plot semua pasangan variabel numerik sekaligus. Untuk mempercepat, dipakai sampel 3000 baris (<code>random_state=1</code> agar hasilnya bisa diulang persis). Yang dicari: pola hubungan.</p>
+<ul>
+  <li><code>engine_size</code>, <code>cylinders</code>, dan keborosan naik bareng → hubungan positif jelas.</li>
+  <li><code>cylinders</code> &amp; <code>n_gears</code> bernilai diskret → titik membentuk garis vertikal, bukan awan kontinu.</li>
+  <li><code>year</code> mendatar terhadap keborosan → hampir tidak berhubungan.</li>
+</ul>
+
+<h3>Boxplot keborosan per kategori (sel 29)</h3>
+<p>Untuk tiap variabel kategorikal, dibuat boxplot keborosan per kategori, diurutkan berdasarkan median. <strong>Boxplot</strong> = kotak yang menunjukkan sebaran: garis tengah = median, kotak = 50% data tengah, "kumis" = jangkauan.</p>
+<div class="analogi">
+Boxplot seperti rapor per kelas: kamu langsung lihat kelas mana yang nilainya tinggi, mana yang rendah, dan mana yang muridnya seragam vs beragam — semua dalam satu pandangan.
+</div>
+<div class="kenapa">
+Ini cek kelayakan SEBELUM one-hot encoding: <strong>jika median keborosan bergeser jelas antar kategori, berarti variabel itu memang mengandung informasi</strong> yang berguna untuk prediksi. Kalau semua kategori medianya sama, variabel itu sia-sia. Ternyata ketiganya bergeser sistematis: Diesel paling hemat, Ethanol/Gas paling boros; kelas naik dari sedan kecil → van/pikap.
+</div>
+
+<!-- ============================================================= -->
+<h2>6. Korelasi: Pearson, Spearman, dan Perangkap p-value</h2>
+<span class="phase-tag">FASE 1 · sel notebook 31–43</span>
+
+<h3>Korelasi Pearson (r) — hubungan LURUS</h3>
+<p>Mengukur kekuatan hubungan <strong>linear</strong> antara dua angka. Nilainya −1 sampai +1: dekat +1 = naik bareng kuat, dekat 0 = tak berhubungan, dekat −1 = satu naik yang lain turun.</p>
+<p>Temuan: <code>engine_size</code> (r=0.81) dan <code>cylinders</code> (r=0.77) berkorelasi kuat dengan keborosan. Tapi keduanya juga sangat berkorelasi satu sama lain (r=0.91) → <strong>multikolinearitas</strong>.</p>
+
+<h3>Korelasi Spearman (ρ) — hubungan MONOTON (searah)</h3>
+<p>Mengukur apakah dua variabel bergerak searah, <em>tanpa</em> mengharuskan garis lurus. Dihitung pada peringkat (rank), jadi lebih tahan outlier.</p>
+
+<div class="analogi">
+<strong>Pearson vs Spearman:</strong> Pearson bertanya "apakah hubungannya berbentuk garis lurus?". Spearman bertanya "apakah kalau yang satu naik, yang lain selalu ikut naik (walau melengkung)?". Contoh: tinggi badan vs harga sepatu cenderung naik searah, tapi tidak lurus sempurna — Spearman menangkapnya, Pearson sedikit meremehkannya.
+</div>
+
+<h3>Perbandingan Pearson vs Spearman = penyaring kelurusan</h3>
+<p>Kalau Pearson ≈ Spearman → hubungannya nyaris lurus, Pearson sah dipakai. Kalau Spearman jauh lebih besar → ada kelengkungan. Di sini selisihnya kecil (+0.04, +0.05), artinya hubungan engine_size & keborosan <strong>naik konsisten dan nyaris lurus</strong> — cuma sedikit melengkung. Ini jadi alasan nanti menguji suku kuadratik di sel 15.</p>
+
+<h3>⭐ Perangkap p-value pada data besar (konsep terpenting di bagian ini)</h3>
+<div class="awas">
+Notebook <strong>sengaja TIDAK memakai p-value</strong> untuk memutuskan korelasi penting/tidak. Ini keputusan canggih yang sering ditanyakan dosen.
+</div>
+<p>p-value uji korelasi hanya bertanya: "apakah korelasi populasi <em>persis</em> nol?". Masalahnya, statistik uji membesar seiring jumlah data (n). Dengan n ≈ 22.555, <strong>korelasi sekecil apa pun otomatis dinyatakan "signifikan" (p ≈ 0)</strong>, bahkan korelasi 0.02 yang sebenarnya tak berguna.</p>
+<div class="analogi">
+p-value pada data raksasa seperti <strong>timbangan digital super-sensitif</strong> yang menunjukkan "BERAT BERTAMBAH!" hanya karena kamu menaruh sehelai rambut. Pernyataannya benar secara teknis, tapi tidak berguna untuk memutuskan apa pun. Yang kamu butuhkan bukan "apakah ada perubahan?" melainkan "<em>seberapa besar</em> perubahannya?".
+</div>
+<p><strong>Solusi tim:</strong> alih-alih p-value, mereka pakai <strong>confidence interval (CI 95%)</strong> dari nilai korelasi dan menguji hipotesis berbasis <em>magnitudo</em>:</p>
+<div class="formula">H₀: |ρ| ≤ 0.1  (korelasi diabaikan)     vs     H₁: |ρ| &gt; 0.1  (korelasi berarti)</div>
+<p>Aturannya: kalau seluruh CI 95% berada di luar rentang [−0.1, 0.1] → korelasi <strong>berarti</strong>. Kalau seluruh CI di dalam [−0.1, 0.1] → bisa <strong>diabaikan</strong>. Kalau CI memotong batas 0.1 → tidak meyakinkan.</p>
+<p>CI dihitung lewat <strong>transformasi Fisher z</strong> (<code>arctanh</code>): nilai r yang distribusinya miring "diluruskan" dulu agar mendekati normal, dihitung intervalnya, lalu dikembalikan (<code>tanh</code>).</p>
+<div class="ingat">
+Intinya: pada data besar, <strong>signifikansi statistik ≠ relevansi praktis</strong>. Yang menentukan keputusan adalah <em>besar</em> korelasi (magnitudo) dan ketidakpastiannya (CI), bukan p-value. Justru data besar membuat estimasi magnitudo makin presisi — itu sisi baiknya. Inilah dasar keputusan membuang <code>year</code> (r = −0.068, seluruh CI di dalam [−0.1, 0.1] → diabaikan).
+</div>
+
+<!-- ============================================================= -->
+<h2 class="pagebreak">7. Seleksi Fitur: Memilih Apa yang Masuk Model</h2>
+<span class="phase-tag">FASE 2 · sel notebook 46–47</span>
+
+<p>Berdasarkan semua temuan Fase 1, diputuskan fitur final:</p>
+<table>
+<tr><th>Fitur</th><th>Keputusan</th><th>Alasan</th></tr>
+<tr><td><code>engine_size</code></td><td>Dipertahankan</td><td>Korelasi kuat (0.81) dengan target</td></tr>
+<tr><td><code>cylinders</code></td><td>Dipertahankan</td><td>Korelasi kuat (0.77); meski kolinear dengan engine_size (0.91), tidak redundan sempurna</td></tr>
+<tr><td><code>n_gears</code></td><td>Dipertahankan</td><td>Boxplot transmisi menunjukkan kaitan dengan keborosan</td></tr>
+<tr><td><code>fuel, vehicle_class, transmission_type</code></td><td>Dipertahankan</td><td>Boxplot: median bergeser sistematis antar kategori</td></tr>
+<tr><td><code>year</code></td><td><strong>DIBUANG</strong></td><td>Korelasi ≈ 0 (|r|&lt;0.07), praktis tak menyumbang</td></tr>
+</table>
+
+<div class="kenapa">
+<strong>Kenapa engine_size & cylinders dua-duanya dipertahankan padahal kolinear (r=0.91)?</strong> Karena kolinearitas tinggi merusak <em>interpretasi koefisien sendiri-sendiri</em> (standard error melonjak), TAPI tidak merusak <em>daya prediksi</em> selama pola korelasi itu berlaku juga di data baru. Untuk tujuan prediksi, membuang salah satunya justru bisa membuang informasi. (Ini nanti dibuktikan empiris lewat ablasi di sel 19.)
+</div>
+<div class="analogi">
+engine_size & cylinders seperti dua jam dinding yang nyaris selalu sama. Kalau kamu cuma ingin tahu "jam berapa sekarang" (prediksi), punya dua jam tidak masalah — malah satu bisa mengoreksi yang lain. Tapi kalau kamu ditanya "jam MANA yang lebih akurat" (interpretasi tiap koefisien), kamu jadi bingung karena keduanya nyaris kembar.
+</div>
+
+<!-- ============================================================= -->
+<h2>8. One-Hot Encoding &amp; Dummy Variable Trap</h2>
+<span class="phase-tag">FASE 2 · sel notebook 49</span>
+
+<p>Tiap variabel kategorikal diubah jadi kolom 0/1 dengan <code>pd.get_dummies()</code>. Kuncinya: untuk kategori dengan k nilai, dibuat hanya <strong>k−1 kolom</strong>, menyisakan satu kategori sebagai <strong>referensi</strong>. Referensi yang dipilih: <code>fuel=Diesel</code>, <code>vehicle_class=COMPACT</code>, <code>transmission_type=Automatic</code>.</p>
+
+<h3>Kenapa k−1, bukan k? (Dummy Variable Trap)</h3>
+<div class="kenapa">
+Kalau kita buat kolom untuk SEMUA kategori, jumlah kolom-kolom itu selalu = 1 di tiap baris (karena tiap mobil pasti satu jenis bahan bakar). Ini menduplikasi informasi intercept (konstanta) dan menciptakan <strong>kolinearitas sempurna</strong> — model jadi tidak bisa dihitung (matriksnya "singular"). Inilah <em>dummy variable trap</em>. Menghapus satu kategori (jadikan referensi) memecahkan masalah ini.
+</div>
+<div class="analogi">
+Kalau di formulir ada centang "Pria" DAN "Wanita", salah satunya mubazir — tahu "bukan Pria" sudah otomatis berarti "Wanita". Cukup satu kotak. Kategori yang dihapus jadi "kondisi default".
+</div>
+<div class="ingat">
+<strong>Arti kategori referensi:</strong> semua koefisien dummy nanti dibaca sebagai "<em>selisih terhadap referensi</em>". Mis. koefisien <code>fuel_Ethanol = +5.49</code> artinya "Ethanol lebih boros 5.49 L/100km <strong>dibanding Diesel</strong>", bukan nilai absolut. Diesel jadi titik nol pembanding.
+</div>
+<p class="small">Catatan: kolom <code>engine_size_sq</code> (engine_size kuadrat) juga disiapkan di sini, tapi hanya untuk perbandingan model linear vs polinomial di sel 15 — belum tentu dipakai.</p>
+
+<!-- ============================================================= -->
+<h2>9. Train/Test Split</h2>
+<span class="phase-tag">FASE 2 · sel notebook 52</span>
+
+<p>Data dibagi 80% <strong>train</strong> (untuk melatih model) dan 20% <strong>test</strong> (disimpan, hanya dibuka di akhir untuk menilai). <code>random_state=1</code> membuat pembagian bisa diulang persis.</p>
+<div class="analogi">
+Seperti belajar untuk ujian: <strong>train = soal latihan</strong> yang kamu pelajari, <strong>test = soal ujian asli</strong> yang belum pernah kamu lihat. Kalau kamu cuma menghafal jawaban soal latihan (overfitting), kamu akan jeblok di ujian. Test set mengukur apakah model benar-benar <em>paham pola</em>, bukan menghafal.
+</div>
+<div class="kenapa">
+Test set harus "dikunci" dan TIDAK boleh dipakai saat memilih fitur atau model — kalau bocor, penilaian akhir jadi terlalu optimis (bocoran soal ujian). Makanya pemilihan model di sel 15 dinilai pakai test, dan ini sah karena test belum pernah menyentuh proses training.
+</div>
+
+<!-- ============================================================= -->
+<h2 class="pagebreak">10. Melatih Model: OLS, Linear vs Polinomial, Parsimoni</h2>
+<span class="phase-tag">FASE 3 · sel notebook 54–56</span>
+
+<h3>OLS (Ordinary Least Squares)</h3>
+<p>Metode mencari koefisien β terbaik dengan <strong>meminimalkan jumlah kuadrat selisih</strong> antara nilai asli dan prediksi:</p>
+<div class="formula">β̂ = argmin Σ (yᵢ − ŷᵢ)²</div>
+<div class="analogi">
+Bayangkan menarik satu garis lurus menembus awan titik data. OLS memilih garis yang membuat <strong>total jarak vertikal kuadrat</strong> dari semua titik ke garis sekecil mungkin. Dikuadratkan supaya jarak ke atas dan ke bawah sama-sama dihitung positif, dan kesalahan besar dihukum lebih berat.
+</div>
+
+<h3>Linear vs Polinomial — menguji kelengkungan</h3>
+<p>Karena perbandingan Pearson-Spearman tadi menandai kelengkungan kecil pada <code>engine_size</code>, dua kandidat diuji:</p>
+<ul>
+  <li><strong>Linear:</strong> semua prediktor sebagai garis lurus.</li>
+  <li><strong>Polinomial:</strong> sama + suku <code>engine_size²</code> (membolehkan kurva melengkung).</li>
+</ul>
+<p>Keduanya dilatih di train, dibandingkan R² di <strong>test</strong>. Hasil: R² test <strong>praktis sama</strong> (selisih ≈ 0), padahal polinomial pakai 1 parameter lebih banyak. Maka dipilih <strong>model LINEAR</strong>.</p>
+<div class="kenapa">
+<strong>Prinsip parsimoni (Occam's Razor):</strong> jika dua model sama bagusnya, pilih yang lebih sederhana. Suku kuadratik tidak menambah kemampuan generalisasi, jadi cuma menambah kerumitan tanpa manfaat — buang saja. Keputusan dinilai di TEST (bukan train), karena di train model rumit hampir selalu terlihat lebih bagus (itu jebakan overfitting).
+</div>
+<div class="analogi">
+Kalau resep dengan 5 bumbu rasanya sama enak dengan resep 6 bumbu, pilih yang 5 bumbu — lebih murah, lebih simpel, hasil sama. Menambah bumbu ke-6 yang tak terasa cuma buang-buang.
+</div>
+
+<!-- ============================================================= -->
+<h2>11. Menilai Model: R², RMSE, MAE, F-statistic</h2>
+<span class="phase-tag">FASE 3 · sel notebook 57–59</span>
+
+<table>
+<tr><th>Metrik</th><th>Arti sederhana</th><th>Bagus kalau…</th></tr>
+<tr><td><strong>R²</strong></td><td>Persentase variasi keborosan yang berhasil dijelaskan model (0–1)</td><td>Mendekati 1. Di sini ≈ 0.84 = 84%</td></tr>
+<tr><td><strong>RMSE</strong></td><td>Rata-rata simpangan prediksi (akar dari rata-rata kuadrat error), satuan asli L/100km. Menghukum error besar lebih berat</td><td>Sekecil mungkin</td></tr>
+<tr><td><strong>MAE</strong></td><td>Rata-rata selisih absolut prediksi, satuan L/100km. Lebih mudah ditafsir</td><td>Sekecil mungkin</td></tr>
+</table>
+
+<div class="formula">R² = 1 − Σ(yᵢ−ŷᵢ)² / Σ(yᵢ−ȳ)²        RMSE = √( (1/n)Σ(yᵢ−ŷᵢ)² )        MAE = (1/n)Σ|yᵢ−ŷᵢ|</div>
+
+<div class="analogi">
+<strong>R²:</strong> kalau tebakanmu "buta" cuma menebak rata-rata, kamu sudah benar sekian persen. R² mengukur seberapa banyak <em>tambahan</em> ketepatan yang diberikan model di atas tebakan rata-rata itu. 84% = model menjelaskan sebagian besar pola.<br>
+<strong>RMSE vs MAE:</strong> RMSE lebih galak ke kesalahan besar (karena dikuadratkan), MAE lebih "demokratis". Bayangkan menilai sopir: MAE = rata-rata meleset berapa meter; RMSE = sama tapi sekali meleset jauh dihukum ekstra.
+</div>
+
+<h3>Train vs Test berdekatan = tidak overfitting</h3>
+<p>R², RMSE, MAE di train dan test <strong>berdekatan</strong>. Artinya model bekerja sama baik di data baru — tidak menghafal, benar-benar belajar pola.</p>
+
+<h3>F-statistic</h3>
+<p>Uji apakah <strong>semua koefisien (selain intercept) bersama-sama</strong> berpengaruh. H₀: semua β = 0 (model tak berguna). F besar dengan p kecil → tolak H₀ → prediktor secara keseluruhan memang berpengaruh.</p>
+
+<!-- ============================================================= -->
+<h2 class="pagebreak">12. Membaca Koefisien (Ceteris Paribus)</h2>
+<span class="phase-tag">FASE 3 · sel notebook 60–62</span>
+
+<p>Cara membaca tiap β:</p>
+<ul>
+  <li><strong>Prediktor numerik (βⱼ):</strong> perubahan prediksi keborosan untuk kenaikan 1 satuan variabel, <em>dengan variabel lain ditahan tetap</em> (ceteris paribus).</li>
+  <li><strong>Prediktor dummy (γₖ):</strong> selisih rata-rata keborosan kategori itu vs kategori referensi.</li>
+  <li><strong>Intercept (β₀):</strong> nilai dasar saat semua numerik = 0 dan semua kategori = referensi. <em>Tidak ditafsir harfiah</em> karena "mesin 0 liter" di luar rentang data.</li>
+</ul>
+
+<div class="analogi">
+<strong>Ceteris paribus</strong> = "anggap hal lain sama". Seperti bertanya "kalau saya tambah 1 sendok gula, manisnya naik berapa — dengan asumsi bahan lain tidak diubah?". Koefisien mengisolasi efek murni satu variabel.
+</div>
+
+<h4>Hasil pembacaan utama:</h4>
+<ul>
+  <li><code>engine_size</code> (+0.64) &amp; <code>cylinders</code> (+0.57): mesin lebih besar/banyak silinder → lebih boros. Dibaca <em>bersama</em> (karena kolinear) sebagai "kapasitas mesin".</li>
+  <li><code>n_gears</code> (−0.05): tiap gigi tambahan sedikit menghemat (transmisi lebih banyak rasio = lebih efisien).</li>
+  <li><strong>Bahan bakar vs Diesel:</strong> semua positif → Diesel paling hemat. Ethanol E85 paling boros (+5.49), lalu Gas (+3.79), Premium (+2.10), Regular (+1.42). Sesuai fakta fisik: ethanol/gas density energinya lebih rendah → butuh volume lebih banyak.</li>
+  <li><strong>Transmisi vs Automatic:</strong> CVT paling hemat (−1.62); sisanya beda tipis.</li>
+  <li><strong>Kelas vs COMPACT:</strong> gradien jelas — mobil kecil (MINICOMPACT −0.20) sampai VAN PASSENGER (+3.92) yang sangat boros.</li>
+</ul>
+<div class="ingat">
+Koefisien tidak cuma "angka model" — arah dan besarnya <strong>masuk akal secara fisik</strong>. Ini tanda model menangkap hubungan nyata, bukan kebetulan statistik.
+</div>
+
+<!-- ============================================================= -->
+<h2>13. Validasi Asumsi: 4 Syarat OLS</h2>
+<span class="phase-tag">FASE 4 · sel notebook 63</span>
+
+<p>Agar p-value & confidence interval OLS boleh dipercaya, error (ε = selisih asli vs prediksi) harus memenuhi 4 asumsi:</p>
+<table>
+<tr><th>Asumsi</th><th>Arti</th><th>Status di proyek</th></tr>
+<tr><td><strong>Linearitas</strong> E[ε|X]=0</td><td>Hubungan memang lurus, model tidak salah bentuk</td><td>OK (dicek plot residual)</td></tr>
+<tr><td><strong>Homoskedastisitas</strong> Var(ε)=σ²</td><td>Sebaran error sama besar di semua tingkat prediksi</td><td>❌ Dilanggar (heteroskedastik)</td></tr>
+<tr><td><strong>Independensi</strong> Cov(εᵢ,εⱼ)=0</td><td>Error antar baris tidak saling terkait</td><td>Diasumsikan (data cross-sectional)</td></tr>
+<tr><td><strong>Normalitas</strong> ε~N(0,σ²)</td><td>Error berdistribusi normal (lonceng)</td><td>❌ Dilanggar (ekor berat)</td></tr>
+</table>
+<div class="kenapa">
+Independensi tidak diuji formal karena data bersifat <strong>cross-sectional</strong> (potret banyak mobil pada satu waktu, bukan deret waktu). Urutan baris tidak bermakna, jadi uji autokorelasi tidak relevan.
+</div>
+
+<!-- ============================================================= -->
+<h2>14. Uji Homoskedastisitas (Breusch-Pagan) &amp; Normalitas (Jarque-Bera)</h2>
+<span class="phase-tag">FASE 4 · sel notebook 64–70</span>
+
+<h3>Apa itu homoskedastisitas?</h3>
+<div class="analogi">
+Homoskedastik = error "seragam". Bayangkan pemanah: kalau sebaran tembakannya sama rapat baik dekat maupun jauh = homoskedastik. Kalau makin jauh target makin berantakan = <strong>heteroskedastik</strong> (sebaran error melebar). Di data ini, prediksi mobil boros lebih "berisik" daripada mobil irit — bentuk corong.
+</div>
+
+<h3>Apa yang sebenarnya diukur tiap uji?</h3>
+<table>
+<tr><th>Uji</th><th>Mengecek</th><th>Lewat besaran apa</th></tr>
+<tr><td><strong>Jarque-Bera</strong> (normalitas)</td><td>Dua hal: bentuk distribusi residual</td><td><strong>Skewness</strong> (condong kiri/kanan; normal = 0) &amp; <strong>Kurtosis</strong> (tebal ekor; normal = 3)</td></tr>
+<tr><td><strong>Breusch-Pagan</strong> (homoskedastisitas)</td><td>Satu hal: apakah variance error tergantung prediktor</td><td><strong>R²_aux</strong> = seberapa besar variasi residual<em>²</em> bisa dijelaskan prediktor. Kalau homoskedastik, harusnya ≈ 0</td></tr>
+</table>
+<div class="analogi">
+<strong>R²_aux</strong>: bayangkan kita coba menebak "seberapa meleset" model dari ciri mobilnya. Kalau errornya benar-benar acak seragam (homoskedastik), ciri mobil <em>tidak akan</em> bisa menebak besar error → R²_aux ≈ 0. Kalau ternyata "mobil boros = error besar" bisa ditebak, berarti sebaran error tidak seragam → heteroskedastik.
+</div>
+
+<h3>Hasil uji formal</h3>
+<p><strong>Breusch-Pagan:</strong> p ≈ 0 → tolak H₀ → <strong>heteroskedastik</strong> (dikonfirmasi pola corong di plot residual).<br>
+<strong>Jarque-Bera:</strong> p ≈ 0 → tolak → <strong>tidak normal</strong>.</p>
+
+<h3>⭐ Lagi-lagi: jangan terjebak p-value pada n besar</h3>
+<div class="awas">
+Sama seperti korelasi tadi, uji BP & JB juga membesar seiring n. Pada n besar, <strong>penyimpangan sekecil apa pun pasti ditolak</strong>. Maka tim TIDAK berhenti di "ditolak" — mereka membaca <em>seberapa besar</em> penyimpangannya terhadap ambang konvensi.
+</div>
+<h4>Aturan keputusan berbasis magnitudo (bukan p-value)</h4>
+<table>
+<tr><th>Aspek</th><th>Besaran</th><th>Ambang konvensi</th></tr>
+<tr><td rowspan="2"><strong>Normalitas</strong><br>(harus lolos KEDUANYA)</td><td>|Skewness|</td><td>≤ 0.5 → kemiringan diabaikan; &gt; 0.5 → condong</td></tr>
+<tr><td>|Excess kurtosis|</td><td>≤ 1 → ekor ~normal; &gt; 1 → ekor berat (leptokurtik)</td></tr>
+<tr><td><strong>Heteroskedastisitas</strong></td><td>R²_aux (= LM/n)</td><td>≲ 0.01 diabaikan · 0.01–0.10 ringan-sedang · ≳ 0.10 substansial</td></tr>
+</table>
+<p>Hasil pengukuran pada data ini:</p>
+<ul>
+  <li><strong>Skewness ≈ 0.42</strong> (≤ 0.5) → kemiringan kanan ringan, bisa diabaikan.</li>
+  <li><strong>Excess kurtosis ≈ 2.1</strong> (jauh &gt; 1) → ekor lebih berat dari normal. <em>Inilah penyimpangan normalitas yang nyata.</em></li>
+  <li><strong>R²_aux ≈ 0.08</strong> (di pita 0.01–0.10) → heteroskedastisitas nyata dengan magnitudo sedang.</li>
+</ul>
+<div class="kenapa">
+<strong>Kenapa pakai ambang dua komponen untuk normalitas?</strong> Karena "tidak normal" bisa berasal dari dua sumber berbeda: <em>condong</em> (skewness) atau <em>ekor berat</em> (kurtosis). Memisahkannya membuat kita tahu <em>jenis</em> penyimpangannya — di sini sumbernya ekor berat, bukan kemiringan — sehingga konsekuensinya bisa dinilai tepat (ekor berat → interval prediksi yang terdampak).
+</div>
+
+<h3>Konsekuensi (dinilai per-dampak, bukan satu vonis)</h3>
+<table>
+<tr><th>Masalah</th><th>Dampak</th><th>Aman?</th></tr>
+<tr><td>Inferensi koefisien</td><td>Berkat n besar, Central Limit Theorem menjaga distribusi penaksir tetap ~normal</td><td>✅ Aman (pakai HC3)</td></tr>
+<tr><td>Estimasi titik koefisien</td><td>Heteroskedastisitas TIDAK membiaskannya</td><td>✅ Aman</td></tr>
+<tr><td>Interval prediksi</td><td>Ekor berat membuat interval (asumsi normal) kurang terkalibrasi</td><td>⚠️ Kurang akurat di ekor</td></tr>
+</table>
+<div class="ingat">
+<strong>Central Limit Theorem (CLT):</strong> dengan sampel besar, rata-rata/penaksir cenderung berdistribusi normal <em>walaupun</em> data aslinya tidak normal. Inilah penyelamat: meski residual tak normal, inferensi koefisien tetap valid secara aproksimasi. Heteroskedastisitas tetap ditangani terpisah dengan HC3 (sel 20).
+</div>
+
+<!-- ============================================================= -->
+<h2 class="pagebreak">15. Diagnostik Visual: Q-Q Plot &amp; Residual vs Fitted</h2>
+<span class="phase-tag">FASE 4 · sel notebook 71–73</span>
+
+<h3>Q-Q plot (Quantile-Quantile)</h3>
+<p>Membandingkan distribusi residual dengan distribusi normal ideal. Kalau titik mengikuti garis 45° lurus → residual normal. Hasil: tengah mengikuti garis, <strong>menyimpang di ekor</strong> — konsisten dengan kurtosis tinggi (ekor berat).</p>
+<div class="analogi">
+Q-Q plot seperti menempelkan tinggi badan kelasmu ke grafik "tinggi badan ideal". Kalau titik-titiknya rapi di garis diagonal, kelasmu "normal". Kalau ujung-ujungnya melengkung keluar, ada beberapa yang sangat pendek/tinggi (ekor berat).
+</div>
+
+<h3>Residual vs Fitted plot</h3>
+<p>Sumbu-x = prediksi, sumbu-y = error. Yang dicari dua hal:</p>
+<ul>
+  <li><strong>Bentuk corong</strong> (melebar) → heteroskedastisitas. ✅ Terlihat di sini.</li>
+  <li><strong>Lengkungan sistematis</strong> → nonlinearitas (bentuk model salah). Tidak terlihat → spesifikasi linear memadai.</li>
+</ul>
+<div class="kenapa">
+Diagnostik visual jadi <strong>penilai penentu</strong> justru karena uji formal terlalu sensitif pada n besar. Mata bisa membedakan "penyimpangan kecil yang tak penting" dari "masalah serius" — sesuatu yang p-value tidak bisa lakukan di sini.
+</div>
+
+<!-- ============================================================= -->
+<h2>16. Refinement: Ablasi Fitur &amp; Standard Error Robust (HC3)</h2>
+<span class="phase-tag">FASE 5 · sel notebook 75–88</span>
+
+<h3>Ablasi: apakah <code>cylinders</code> benar-benar berguna?</h3>
+<p>"Ablasi" = buang satu komponen, lihat dampaknya. Karena <code>cylinders</code> kolinear dengan <code>engine_size</code>, diuji: latih model TANPA cylinders, bandingkan R² test. Hasil: R² test <strong>turun ~0.02</strong>.</p>
+<div class="kenapa">
+Penurunan ini terjadi di TEST (bukan cuma train), jadi informasinya nyata, bukan overfitting. Kesimpulan: <strong>kolinear ≠ redundan</strong>. <code>cylinders</code> menyumbang daya prediksi di luar <code>engine_size</code>, jadi layak dipertahankan. Inilah bukti empiris untuk keputusan di sel 12.
+</div>
+
+<h3>Ablasi: konfirmasi membuang <code>year</code></h3>
+<p>Untuk memastikan, <code>year</code> dimasukkan kembali. Hasil: R² test berubah ≈ 0.000 dan koefisiennya tidak signifikan. <strong>Keputusan membuang year terkonfirmasi</strong> dengan standar held-out (test) — bukan cuma alasan korelasi marginal di Fase 1, tapi juga tidak berguna secara kondisional setelah variabel lain dikontrol.</p>
+<div class="analogi">
+Ablasi seperti melepas satu pemain dari tim lalu menghitung skor. Kalau tim tetap menang telak tanpa dia (year), dia memang tidak berkontribusi. Kalau skor turun (cylinders), dia ternyata penting walau bayangannya tumpang-tindih dengan pemain lain.
+</div>
+
+<h3>Standard Error Robust HC3 — memperbaiki inferensi</h3>
+<p>Karena terbukti heteroskedastik, standard error OLS klasik <strong>keliru</strong> (p-value & CI tidak bisa dipercaya). Solusinya: ganti dengan <strong>HC (heteroskedasticity-consistent) standard error</strong> yang tidak mengasumsikan variance error konstan.</p>
+
+<h4>Bagaimana HC bekerja (intuisi)</h4>
+<p>SE OLS biasa menganggap <strong>semua titik sama berisiknya</strong> — satu ukuran noise dipakai untuk seluruh data. Saat heteroskedastik, itu keliru: sebagian wilayah prediksi sebaran errornya jauh lebih lebar. HC memperbaikinya dengan membiarkan <strong>tiap pengamatan punya tingkat noise sendiri</strong>, ditaksir langsung dari besar residualnya. Titik yang meleset jauh dianggap lebih tidak pasti → kontribusinya ke perhitungan SE diperbesar.</p>
+<div class="analogi">
+Seperti survei pendapat: kalau sebagian responden menjawab asal-asalan (noise besar), kamu tidak memberi mereka bobot yang sama dengan responden yang menjawab serius. HC "mendengarkan" tiap titik sesuai seberapa bisa dipercaya — tanpa perlu tahu dulu pola heteroskedastisitasnya.
+</div>
+<div class="ingat">
+Dua sifat penting HC:<br>
+1. <strong>Hanya mengubah SE, p-value, dan CI</strong> — titik estimasi koefisien TIDAK bergeser sedikit pun.<br>
+2. <strong>No-regret (tanpa penyesalan):</strong> kalau ternyata data homoskedastik, SE HC otomatis kembali mendekati SE OLS biasa. Jadi memakainya hampir tanpa risiko, tapi menyelamatkan inferensi saat ada heteroskedastisitas.
+</div>
+<div class="analogi">
+Bayangkan GPS yang melaporkan posisimu (titik estimasi) sudah benar, tapi salah melaporkan <em>seberapa akurat</em> sinyalnya. HC tidak memindahkan titiknya — ia memperbaiki "lingkaran ketidakpastian" di sekitarnya agar jujur.
+</div>
+
+<h4>Kenapa varian HC3 (bukan HC0–HC2)?</h4>
+<div class="kenapa">
+Ada beberapa varian HC0–HC3 yang beda pada seberapa hati-hati menangani titik <em>leverage</em> tinggi (titik berpengaruh ekstrem). HC0/HC1 cenderung <strong>meremehkan</strong> ketidakpastian saat ada titik begitu; <strong>HC3 paling konservatif</strong> — sengaja memberi bobot ekstra ke titik-titik itu sehingga SE tidak pernah terlalu optimis. Pada data sebesar ini selisih antar-varian hampir nol, jadi <em>memilih yang paling aman tidak ada ruginya</em>: aman saat normal, terlindungi saat ada outlier.
+</div>
+<div class="ingat">
+Hasil: SE engine_size & cylinders naik ~40% (SE klasik ternyata terlalu optimis), sebagian dummy bahan bakar malah turun. Ini bukti langsung SE klasik tak akurat saat heteroskedastik.
+</div>
+<div class="awas">
+<strong>Batas HC3:</strong> ia mengoreksi heteroskedastisitas, TAPI bukan <em>korelasi dalam-grup</em> (mis. beberapa varian dari model kendaraan yang sama). Untuk itu butuh standard error berbasis <strong>cluster</strong> (per model kendaraan). Ini sebabnya keterbatasan independensi tetap disebut di kesimpulan.
+</div>
+
+<h3>Final Coefficient Report</h3>
+<p>Tabel akhir berisi koefisien + SE + p-value + CI 95%, semuanya berbasis HC3. Aturan baca: <strong>kalau CI 95% tidak melewati nol → koefisien signifikan</strong> (beda nyata dari nol). Hampir semua prediktor signifikan; beberapa kelas kecil yang mirip COMPACT bisa tidak signifikan — wajar, artinya kelas itu memang tak beda dari referensi.</p>
+
+<!-- ============================================================= -->
+<h2 class="pagebreak">17. Kesimpulan &amp; Keterbatasan Model</h2>
+<span class="phase-tag">FASE 5 · sel notebook 89–91</span>
+
+<h3>Hasil utama</h3>
+<ul>
+  <li>Model menjelaskan <strong>≈ 84% variasi</strong> konsumsi bahan bakar, dan menggeneralisasi baik (R² train ≈ test, tanpa overfitting).</li>
+  <li><strong>Penggerak utama:</strong> jenis bahan bakar (Diesel hemat, Ethanol/Gas boros), kelas kendaraan (kecil → van/pikap/SUV), ukuran mesin (engine_size + cylinders). Pengaruh kecil: n_gears & tipe transmisi (CVT paling hemat).</li>
+  <li>Suku kuadratik tidak terpakai (parsimoni); year dibuang (tak berguna).</li>
+</ul>
+
+<h3>Keterbatasan (dari asumsi yang dilanggar) — bagian jujur yang penting</h3>
+<table>
+<tr><th>Keterbatasan</th><th>Akibat &amp; penanganan</th></tr>
+<tr><td><strong>Heteroskedastisitas</strong> (BP)</td><td>Estimasi titik tetap tak bias; SE klasik keliru → sudah dikoreksi HC3. p-value & CI yang dilaporkan boleh ditafsir.</td></tr>
+<tr><td><strong>Non-normalitas</strong> ekor berat (JB)</td><td>Inferensi koefisien tetap valid (CLT), TAPI interval prediksi kurang terkalibrasi — kejadian ekstrem lebih sering dari dugaan model.</td></tr>
+<tr><td><strong>Independensi tak diuji</strong></td><td>Varian dari model mobil yang sama bisa berkorelasi (korelasi dalam-grup) → SE bisa terlalu optimis. HC3 tak mengatasi ini; butuh cluster SE (per model kendaraan).</td></tr>
+<tr><td><strong>Asosiatif, bukan kausal</strong></td><td>Model menunjukkan <em>kaitan</em>, bukan sebab-akibat. "Mesin besar berkaitan dengan boros" ≠ "memperbesar mesin pasti menyebabkan boros sebesar itu".</td></tr>
+</table>
+
+<div class="ingat">
+<strong>Kesimpulan akhir:</strong> model andal untuk (1) prediksi titik, (2) menentukan arah & peringkat pengaruh faktor, dan (3) inferensi signifikansi per koefisien (berkat HC3). Yang belum sempurna: interval prediksi (non-normalitas) & kemungkinan korelasi dalam-grup. Mengakui keterbatasan ini adalah tanda analisis yang matang — bukan kelemahan.
+</div>
+
+<!-- ============================================================= -->
+<h2>18. Glosarium Istilah Penting</h2>
+<table>
+<tr><th>Istilah</th><th>Arti singkat + analogi</th></tr>
+<tr><td><strong>Prediktor / Fitur</strong></td><td>Variabel input untuk menebak target. (Bahan-bahan resep.)</td></tr>
+<tr><td><strong>Target / Respons</strong></td><td>Yang ingin diprediksi (keborosan). (Rasa masakan akhir.)</td></tr>
+<tr><td><strong>Koefisien (β)</strong></td><td>Bobot pengaruh tiap fitur. (Harga satuan tiap barang.)</td></tr>
+<tr><td><strong>Intercept (β₀)</strong></td><td>Nilai dasar saat semua input nol/referensi. (Ongkir tetap.)</td></tr>
+<tr><td><strong>Residual / Error (ε)</strong></td><td>Selisih nilai asli − prediksi. (Meleset berapa jauh.)</td></tr>
+<tr><td><strong>OLS</strong></td><td>Cara cari garis terbaik dgn minimalkan jumlah kuadrat error.</td></tr>
+<tr><td><strong>Multikolinearitas</strong></td><td>Dua prediktor saling sangat berkorelasi. (Dua jam kembar.)</td></tr>
+<tr><td><strong>One-hot encoding</strong></td><td>Ubah kategori jadi kolom 0/1. (Formulir centang.)</td></tr>
+<tr><td><strong>Dummy variable trap</strong></td><td>Membuat kolom utk semua kategori → kolinearitas sempurna. Hindari dgn k−1 kolom.</td></tr>
+<tr><td><strong>Kategori referensi</strong></td><td>Kategori yang dihapus, jadi pembanding semua koefisien dummy.</td></tr>
+<tr><td><strong>Overfitting</strong></td><td>Model menghafal data latih, gagal di data baru. (Menghafal kunci jawaban.)</td></tr>
+<tr><td><strong>Parsimoni</strong></td><td>Pilih model sederhana jika hasilnya setara. (Occam's Razor.)</td></tr>
+<tr><td><strong>R²</strong></td><td>% variasi target yang dijelaskan model (0–1).</td></tr>
+<tr><td><strong>RMSE / MAE</strong></td><td>Rata-rata besar error (RMSE menghukum error besar lbh berat).</td></tr>
+<tr><td><strong>p-value</strong></td><td>Peluang melihat data seekstrem ini jika H₀ benar. <em>Menyesatkan pada n besar.</em></td></tr>
+<tr><td><strong>Confidence Interval (CI)</strong></td><td>Rentang nilai yang masuk akal untuk parameter sebenarnya.</td></tr>
+<tr><td><strong>Pearson (r)</strong></td><td>Kekuatan hubungan LURUS antar dua angka.</td></tr>
+<tr><td><strong>Spearman (ρ)</strong></td><td>Kekuatan hubungan SEARAH (monoton), tahan outlier.</td></tr>
+<tr><td><strong>Homoskedastisitas</strong></td><td>Sebaran error sama di semua tingkat. Lawannya heteroskedastisitas (corong).</td></tr>
+<tr><td><strong>Skewness</strong></td><td>Kemiringan distribusi (0 = simetris).</td></tr>
+<tr><td><strong>Kurtosis</strong></td><td>Berat ekor distribusi (3 = normal; lebih = ekor berat/leptokurtik).</td></tr>
+<tr><td><strong>Breusch-Pagan</strong></td><td>Uji formal homoskedastisitas.</td></tr>
+<tr><td><strong>Jarque-Bera</strong></td><td>Uji formal normalitas (pakai skewness & kurtosis).</td></tr>
+<tr><td><strong>Q-Q plot</strong></td><td>Grafik cek normalitas residual vs garis 45°.</td></tr>
+<tr><td><strong>Central Limit Theorem</strong></td><td>Penaksir cenderung normal pada n besar walau data tak normal.</td></tr>
+<tr><td><strong>HC3 robust SE</strong></td><td>Standard error tahan heteroskedastisitas; koreksi p-value & CI.</td></tr>
+<tr><td><strong>Ablasi</strong></td><td>Buang satu fitur, ukur dampak ke performa.</td></tr>
+<tr><td><strong>Cross-sectional</strong></td><td>Data potret banyak objek pada satu waktu (bukan deret waktu).</td></tr>
+<tr><td><strong>Ceteris paribus</strong></td><td>"Dengan hal lain ditahan tetap."</td></tr>
+<tr><td><strong>Asosiatif vs Kausal</strong></td><td>Berkaitan ≠ menyebabkan.</td></tr>
+</table>
+
+<p class="small" style="margin-top:20px; text-align:center; color:#888;">— Selesai. Semoga membantu memahami setiap keputusan di <code>AI.ipynb</code>, bukan sekadar menghafalnya. —</p>
+
+</body>
+</html>
